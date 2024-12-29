@@ -9,42 +9,34 @@ import {
 import { styles } from "./styles";
 import { Participant } from "../../components/Participant";
 import { useState } from "react";
-/**
- *
- *
- * @export
- * @return {*}
- */
-export function Home() {
-  const participants = [
-    "Marcos",
-    "João",
-    "Maria",
-    "Rodrigo",
-    "Sarah",
-    "Ana",
-    "Zé",
-    "Cristina",
-  ];
-  const [addParticipantName, setAddParticipantName] = useState("");
+import { EmptyList } from "../../components/EmptyList";
 
-  function handleAddParticipant(name: string) {
-    if (participants.includes(name)) {
-      Alert.alert("Participante já foi adicionado");
+export function Home() {
+  const [participants, setParticipants] = useState<string[]>([]);
+  const [participantName, setParticipantName] = useState("");
+
+  function handleAddParticipant() {
+    if (participants.includes(participantName)) {
+      return Alert.alert(`Participante: ${participantName} já foi adicionado`);
     }
-    console.log("Adicionando participante");
+
+    setParticipants((prevState) => [...prevState, participantName]);
+    setParticipantName("");
+  }
+
+  function removeParticipant(name: string) {
+    setParticipants((prevState) => prevState.filter((item) => item !== name));
   }
 
   function handleParticipantRemove(name: string) {
     Alert.alert("Remover", `Deseja remover o participante: ${name}?`, [
       {
-        onPress: () => console.log("Cancelado"),
-        text: "Cancelar",
-        style: "cancel",
+        onPress: () => removeParticipant(name),
+        text: "Remover",
       },
       {
-        onPress: () => Alert.alert(`${name} for removido`),
-        text: "Remover",
+        text: "Cancelar",
+        style: "cancel",
       },
     ]);
   }
@@ -59,12 +51,13 @@ export function Home() {
           style={styles.input}
           placeholder="Nome do participante"
           placeholderTextColor="#6B6B6B"
-          onChange={(e) => setAddParticipantName(e.nativeEvent.text)}
+          onChangeText={setParticipantName}
+          value={participantName}
         />
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => handleAddParticipant(addParticipantName)}
+          onPress={() => handleAddParticipant()}
         >
           <Text style={styles.buttonText}>+</Text>
         </TouchableOpacity>
@@ -77,11 +70,7 @@ export function Home() {
         renderItem={({ item }) => (
           <Participant name={item} onRemove={handleParticipantRemove} />
         )}
-        ListEmptyComponent={() => (
-          <Text style={styles.listEmptyText}>
-            Nenhum participante adicionado.
-          </Text>
-        )}
+        ListEmptyComponent={<EmptyList />}
       />
     </View>
   );
